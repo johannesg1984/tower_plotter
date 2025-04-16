@@ -18,15 +18,16 @@ def plot_tower(dataframe:pd.DataFrame,filename:str):
 
     # Loop through DataFrame rows and plot each line
     for _, row in dataframe.iterrows():
-        plt.plot([row['origin_y'], row['end_y']], [row['origin_z'], row['end_z']], marker='o')
+        plt.plot([row['origin_y'], row['end_y']], [row['origin_z'], row['end_z']],"b")
 
-    plt.title('Lines from Origin to End')
+    plt.title('filename')
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.grid(True)
     plt.axis('equal')  # Equal scaling for x and y axes
     plt.savefig(filename,dpi=300)
     plt.axis("equal")
+    plt.grid()
     plt.close()
 
 
@@ -78,6 +79,8 @@ if __name__=="__main__":
     
 
     for file in files:
+        print("**")
+        print(file)
 
         res_file=Res_File_Reader.from_res_file(os.path.join(input_folder,file))
         if i>=max_files:
@@ -85,6 +88,8 @@ if __name__=="__main__":
 
         
         angles=res_file.parse_angle_info()
+        foundations=res_file.find_foundations()
+        
         angles.to_csv(os.path.join(output_csv,file[0:-4]+".csv"))
         plot_tower(angles,os.path.join(output_png,file[0:-4]+".png"))
 

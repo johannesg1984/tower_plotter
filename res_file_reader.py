@@ -162,9 +162,6 @@ class Res_File_Reader:
 
 
 
-        print(df_combined)
-        
-
         return df_combined
 
 
@@ -202,24 +199,32 @@ class Res_File_Reader:
 
         lines = self._cut_list(keyword)
 
-        # nodename, x_coord, y_coord, z_coord
-        nodes = set()
+   
+
+        data = defaultdict(list)
 
         for line in lines:
-
             info = line.split(",")
+            data["Node_name"].append(info[1].strip("'"))
+            data["x"].append(float(info[5]))
+            data["y"].append(float(info[6]))
+            data["z"].append(float(info[7]))
+            data["Node_name"].append(info[2].strip("'"))
+            data["x"].append(float(info[8]))
+            data["y"].append(float(info[9]))
+            data["z"].append(float(info[10]))
+        
+        nodes_df=pd.DataFrame(data)
 
-            node_1 = (info[1], float(info[5]), float(info[6]), float(info[7]))
-            node_2 = (info[2], float(info[8]), float(info[9]), float(info[10]))
+        nodes_df=nodes_df.drop_duplicates()
 
-            nodes.add(node_1)
-            nodes.add(node_2)
 
-        self.nodes = nodes
+        self.nodes=nodes_df
 
-        return nodes
 
-    def find_foundations(self) -> list:
+        return nodes_df
+
+    def find_foundations(self) -> pd.DataFrame:
 
         """""only works with tower that has 4 foundations.""" ""
 
@@ -239,16 +244,38 @@ class Res_File_Reader:
 
         _keys = ["f1", "f2", "f3", "f4"]
 
-        _f = OrderedDict.fromkeys(_keys, 0)
+        data = defaultdict(list)
+        data["found"]=[]
+        
+
+        # _f = OrderedDict.fromkeys(_keys, 0)
 
         for found in _keys:
             max_z = 0
-            for coord in coords:
-                if _quadrant(coord[1], coord[2]) == found and coord[3] < max_z:
-                    _f[found] = coord[0]
-                    max_z = coord[3]
+            data["found"].append("")
+            data["Node_name"].append("")
+            for _, row in coords.iterrows():
+                if _quadrant(row["x"], row["y"]) == found and row["z"] < max_z:
+                    data["Node_name"][-1] = row["Node_name"]
+                    data["found"][-1] = found
+                    max_z = row["z"]
 
-        return list(_f.values())
+        
+
+
+        _temp_df=pd.DataFrame(data)
+   
+        merged_df = coords.merge(_temp_df, on='Node_name')
+        
+
+        
+
+        # print(foundations_df)
+
+
+
+        
+        return merged_df
 
     def find_loads_foundations(self):
         def find_forces(lines, node_name):
