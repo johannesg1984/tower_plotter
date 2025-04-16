@@ -156,8 +156,19 @@ class Res_File_Reader:
         element_size=self.find_element_size()
         angle_information=self.find_elements()
 
+        member_groups.rename(columns={'member_label': 'angle_label'}, inplace=True)
+        df_combined =  angle_information.merge(member_groups, on='angle_label')
+        df_combined =  df_combined.merge(element_size, on='group_label')
 
-        pass
+
+
+        print(df_combined)
+        
+
+        return df_combined
+
+
+        
 
 
 
