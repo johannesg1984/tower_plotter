@@ -122,13 +122,13 @@ class Res_File_Reader:
             info = line.split(",")
 
             data["angle_label"].append(info[0].strip("'"))
-            data["length"].append(info[4])
-            data["origin_x"].append(info[5])
-            data["origin_y"].append(info[6])
-            data["origin_z"].append(info[7])
-            data["end_x"].append(info[8])
-            data["end_y"].append(info[9])
-            data["end_z"].append(info[10])
+            data["length"].append(float(info[4]))
+            data["origin_x"].append(float(info[5]))
+            data["origin_y"].append(float(info[6]))
+            data["origin_z"].append(float(info[7]))
+            data["end_x"].append(float(info[8]))
+            data["end_y"].append(float(info[9]))
+            data["end_z"].append(float(info[10]))
         
         return pd.DataFrame(data)
     
