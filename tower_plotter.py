@@ -12,23 +12,47 @@ def find_element_sizes(dataframe:pd.DataFrame,elements:list):
     pass
 
 
-def plot_tower(dataframe:pd.DataFrame,filename:str):
+def plot_tower(dataframe:pd.DataFrame,foundations:pd.DataFrame,filename:str):
 
-    plt.figure(figsize=(8, 6))
+    y_value_right = foundations.loc[foundations['found'] == "f1", 'y'].values[0]
+    y_value_left = foundations.loc[foundations['found'] == "f2", 'y'].values[0]
 
-    # Loop through DataFrame rows and plot each line
+
+    # elements_right_panel=dataframe
+    # elements_right_panel = dataframe[(dataframe['origin_y'] - y_value_right).abs() <= 0.1&(dataframe['end_y'] - y_value_right).abs() <= 0.1]
+    elements_right_panel = dataframe[
+    ((dataframe['origin_y'] - y_value_right).abs() <= 0.1) &
+    ((dataframe['end_y'] - y_value_right).abs() <= 0.1)
+    ]
+
+    elements_left_panel = dataframe[
+    ((dataframe['origin_y'] - y_value_left).abs() <= 0.1) &
+    ((dataframe['end_y'] - y_value_left).abs() <= 0.1)
+    ]
+    # Create a figure with 1 row, 3 columns of axes
+    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(15, 4))
+
+    # First plot
+    for _, row in elements_left_panel.iterrows():
+        axes[0].plot([row['origin_x'], row['end_x']], [row['origin_z'], row['end_z']],"b")
+    axes[0].set_aspect('equal', adjustable='box')
+ 
+
+    # Second plot
     for _, row in dataframe.iterrows():
-        plt.plot([row['origin_y'], row['end_y']], [row['origin_z'], row['end_z']],"b")
+        axes[1].plot([row['origin_y'], row['end_y']], [row['origin_z'], row['end_z']],"b")
+    axes[1].set_aspect('equal', adjustable='box')
 
-    plt.title('filename')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.grid(True)
-    plt.axis('equal')  # Equal scaling for x and y axes
+    # Third plot
+    # Note: tan grows large—limit the y‑axis for clarity
+   # Second plot
+    for _, row in elements_right_panel.iterrows():
+        axes[2].plot([row['origin_x'], row['end_x']], [row['origin_z'], row['end_z']],"b")
+    axes[2].set_aspect('equal', adjustable='box')
     plt.savefig(filename,dpi=300)
-    plt.axis("equal")
-    plt.grid()
-    plt.close()
+
+
+
 
 
 def delete_all_files(folder_path):
@@ -65,7 +89,7 @@ if __name__=="__main__":
 
     i=0
 
-    max_files=10
+    max_files=20
 
     elements=["SOG","SUG","MMD","STV","MHJ",]
 
@@ -79,9 +103,7 @@ if __name__=="__main__":
     
 
     for file in files:
-        print("**")
-        print(file)
-
+   
         res_file=Res_File_Reader.from_res_file(os.path.join(input_folder,file))
         if i>=max_files:
             break
@@ -91,7 +113,7 @@ if __name__=="__main__":
         foundations=res_file.find_foundations()
         
         angles.to_csv(os.path.join(output_csv,file[0:-4]+".csv"))
-        plot_tower(angles,os.path.join(output_png,file[0:-4]+".png"))
+        plot_tower(angles,foundations,os.path.join(output_png,file[0:-4]+".png"))
 
         i+=1
 
